@@ -1,22 +1,45 @@
 import { PrismaClient } from "@prisma/client";
 import fastify from "fastify";
-
 import { z } from 'zod'
+import fastifyCors from 'fastify-cors'; 
 
 const app = fastify();
-
 const prisma = new PrismaClient();
 
+app.register( fastifyCors, {
+    origin: '*'
+})
 
+
+// get all transactions
 app.get('/transactions', async (req, res) => {
     try {
-        const transactions = await prisma.transaction.findMany();
-        return { transactions }
+      const getTransactionsSchema = z.object({
+        userId: z.string().optional(), 
+      });
+  
+      const parsedData = getTransactionsSchema.safeParse(req.query);
+  
+      if (parsedData.success) {
+        const { userId } = parsedData.data;  
+        const transactions = await prisma.transaction.findMany({
+          where: userId ? { userId } : undefined,
+        });
+  
+        return { transactions };
+      } else {
+        console.error("Invalid query parameters:", parsedData.error);
+        res.status(400).send({ error: "Invalid request parameters" }); // Handle parsing errors
+      }
     } catch (error) {
-        res.status(500).send(error);
+      console.error(error);
+      res.status(500).send(error); // Handle unexpected errors
     }
-});
+  });
+  
 
+
+//Create transaction
 app.post('/transactions', async (req, res) => {
     try {
         const createTransactionSchema = z.object({
@@ -56,9 +79,6 @@ app.post('/transactions', async (req, res) => {
                 endDate
             }
         })
-
-        // const transaction = new Transaction(req.body);
-        // await transaction.save();
         res.status(201).send();
     } catch (error) {
         res.status(400).send(error);
