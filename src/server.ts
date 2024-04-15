@@ -13,29 +13,29 @@ app.register( fastifyCors, {
 
 // get all transactions
 app.get('/transactions', async (req, res) => {
-    try {
-      const getTransactionsSchema = z.object({
-        userId: z.string().optional(), 
+  try {
+    const getTransactionsSchema = z.object({
+      userId: z.string().optional(), 
+    });
+
+    const parsedData = getTransactionsSchema.safeParse(req.query);
+
+    if (parsedData.success) {
+      const { userId } = parsedData.data;  
+      const transactions = await prisma.transaction.findMany({
+        where: userId ? { userId } : undefined,
       });
-  
-      const parsedData = getTransactionsSchema.safeParse(req.query);
-  
-      if (parsedData.success) {
-        const { userId } = parsedData.data;  
-        const transactions = await prisma.transaction.findMany({
-          where: userId ? { userId } : undefined,
-        });
-  
-        return { transactions };
-      } else {
-        console.error("Invalid query parameters:", parsedData.error);
-        res.status(400).send({ error: "Invalid request parameters" }); // Handle parsing errors
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(500).send(error); // Handle unexpected errors
+
+      return res.send(transactions); // Retorna diretamente o array de transações
+    } else {
+      console.error("Invalid query parameters:", parsedData.error);
+      res.status(400).send({ error: "Invalid request parameters" }); // Handle parsing errors
     }
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error); // Handle unexpected errors
+  }
+});
   
 
 
