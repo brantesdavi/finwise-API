@@ -43,16 +43,16 @@ app.get('/transactions', async (req, res) => {
     }
 });
 
-app.post('/transactions', async (req, res) => {
+app.get('/transactions/:userId', async (req, res) => {
     try {
-      const { userId } = req.body; // Obtém o userId do corpo da solicitação
-      const transactions = await Transaction.find({ userId });
-      res.json(transactions);
+        const userId = req.params.userId;
+        const transactions = await Transaction.find({ userId }); // Encontre todas as transações com o ID do usuário fornecido
+        res.json(transactions); // Retorne as transações encontradas como JSON
     } catch (error) {
-      console.error('Erro ao buscar transações:', error);
-      res.status(500).json({ message: 'Erro ao buscar transações' });
+        console.error('Erro ao buscar transações:', error);
+        res.status(500).json({ message: 'Erro ao buscar transações' });
     }
-  });
+});
   
 
 app.listen(PORT, () => {
