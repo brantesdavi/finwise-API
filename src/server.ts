@@ -47,7 +47,7 @@ app.post('/transactions', async (req, res) => {
       title: z.string(),
       price: z.number(),
       date: z.string().pipe(z.coerce.date()),
-      categoryId: z.number(),
+      categoryId: z.number().optional(),
       userId: z.string(),
       recurrrenceUnit: z.string().nullable().transform((val) => (val === '' ? null : val)).optional(),
       quantity: z.number().optional(),

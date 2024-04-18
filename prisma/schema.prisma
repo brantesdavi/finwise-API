@@ -20,7 +20,7 @@ model Transaction {
   title String
   price Float
   date DateTime
-  categoryId Int
+  categoryId Int?
   userId String
 
   recurrrenceUnit String? 
